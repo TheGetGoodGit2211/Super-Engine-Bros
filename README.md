@@ -20,3 +20,4 @@
 ## Acknowledgements
 * **Graphics:** [wgpu](https://github.com/gfx-rs/wgpu) (MIT / Apache-2.0)
 * **ECS:** [hecs](https://github.com/Ralith/hecs) (MIT / Apache-2.0)
+* **Hello Window Code:** [Rust Graphics Mages (gfx-rs)](https://github.com/gfx-rs) (MIT / Apache-2.0)
