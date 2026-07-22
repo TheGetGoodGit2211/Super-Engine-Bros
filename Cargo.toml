@@ -1,7 +1,7 @@
 [package]
 name = "super-engine-bros"
 version = "0.1.0-dev"
-edition = "2026"
+edition = "2024"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 keywords = ["gamedev", "game-engine", "ecs", "wgpu", "mario"]
