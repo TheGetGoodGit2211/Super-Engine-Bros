@@ -8,6 +8,7 @@ keywords = ["gamedev", "game-engine", "ecs", "wgpu", "mario"]
 categories = ["game-engines", "rendering", "graphics"]
 
 [dependencies]
+bytemuck = { version = "1.25.2", features = ["derive"] }
 pollster = "1.0.1"
 wgpu = "30.0.0"
 winit = { version = "0.30.13", features = ["rwh_06"] }

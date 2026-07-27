@@ -1,5 +1,7 @@
 mod app;
 mod state;
+mod vertex;
+mod renderer;
 
 use app::App;
 

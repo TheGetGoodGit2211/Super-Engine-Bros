@@ -44,7 +44,7 @@ impl ApplicationHandler for App {
                 state.get_window().request_redraw();
             }
             WindowEvent::Resized(size) => {
-                state.resize(size);
+                state.renderer.resize(size);
             }
             _ => (),
         }
