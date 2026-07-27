@@ -2,6 +2,8 @@ mod app;
 mod state;
 mod vertex;
 mod renderer;
+mod shader;
+mod pipelines;
 
 use app::App;
 
