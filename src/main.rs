@@ -5,6 +5,7 @@ mod renderer;
 mod shader;
 mod pipelines;
 mod screen_uniform;
+mod quad_instance;
 
 use app::App;
 

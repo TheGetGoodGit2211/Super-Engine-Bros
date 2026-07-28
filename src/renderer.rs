@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use wgpu::util::{BufferInitDescriptor, DeviceExt};
+use wgpu::{util::{BufferInitDescriptor, DeviceExt}};
 use winit::{event_loop::OwnedDisplayHandle, window::Window};
 
-use crate::{pipelines::hello_pipeline::HelloPipeline, screen_uniform::ScreenUniform, shader::Shader, vertex::Vertex};
+use crate::{pipelines::hello_pipeline::HelloPipeline, quad_instance::{QuadInstance}, screen_uniform::ScreenUniform, shader::Shader, vertex::Vertex};
 
 pub struct Renderer {
     pub device: wgpu::Device,
@@ -39,27 +39,21 @@ impl Renderer {
         let cap = surface.get_capabilities(&adapter);
         let surface_format = cap.formats[0];
 
-        const INDICES: &[u16] = &[0, 1, 2, 2, 3, 0];
-        const VERTICES: &[Vertex; 4] = &[
-            // Top-Left corner (100, 100)
-            Vertex { position: [100.0, 100.0, 0.0, 1.0], color: [1.0, 0.0, 0.0, 1.0] },
-            // Bottom-Left corner (100, 164)
-            Vertex { position: [100.0, 164.0, 0.0, 1.0], color: [0.0, 1.0, 0.0, 1.0] },
-            // Bottom-Right corner (164, 164)
-            Vertex { position: [164.0, 164.0, 0.0, 1.0], color: [0.0, 0.0, 1.0, 1.0] },
-            // Top-Right corner (164, 100)
-            Vertex { position: [164.0, 100.0, 0.0, 1.0], color: [1.0, 1.0, 0.0, 1.0] },
-        ];
+        let indices: &[u16] = &[0, 1, 2, 2, 3, 0];
+
+        let quad = QuadInstance::new([20.0, 20.0], [80.0, 80.0], [1.0, 0.0,  0.0, 1.0]);
+
+        let vertices = &quad.to_verts();
 
         let vertex_buffer = device.create_buffer_init(&BufferInitDescriptor {
             label: Some("Hello Vert Buffer"),
-            contents: bytemuck::cast_slice(VERTICES),
+            contents: bytemuck::cast_slice(vertices),
             usage: wgpu::BufferUsages::VERTEX,
         });
 
         let index_buffer = device.create_buffer_init(&BufferInitDescriptor {
             label: Some("Hello IDX Buffer"),
-            contents: bytemuck::cast_slice(INDICES),
+            contents: bytemuck::cast_slice(indices),
             usage: wgpu::BufferUsages::INDEX,
         });
 
