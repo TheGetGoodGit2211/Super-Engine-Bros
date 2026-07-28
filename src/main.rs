@@ -7,6 +7,7 @@ mod pipelines;
 mod screen_uniform;
 mod quad_instance;
 mod surface_context;
+mod quad_buffers;
 
 use app::App;
 

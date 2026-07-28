@@ -1,16 +1,17 @@
 use std::sync::Arc;
 
-use wgpu::{util::{BufferInitDescriptor, DeviceExt}};
+use wgpu::util::DeviceExt;
 use winit::{event_loop::OwnedDisplayHandle, window::Window};
 
-use crate::{pipelines::hello_pipeline::HelloPipeline, quad_instance::QuadInstance, screen_uniform::ScreenUniform, shader::Shader, surface_context::SurfaceContext};
+use crate::{pipelines::hello_pipeline::HelloPipeline, quad_buffers::QuadBuffers, quad_instance::QuadInstance, screen_uniform::ScreenUniform, shader::Shader, surface_context::SurfaceContext};
 
 pub struct Renderer {
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
     pipeline: HelloPipeline,
-    vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
+    // vertex_buffer: wgpu::Buffer,
+    // index_buffer: wgpu::Buffer,
+    quad_buffers: QuadBuffers,
     screen_buffer: wgpu::Buffer,
     screen_bind_group: wgpu::BindGroup,
     screen_uniform: ScreenUniform,
@@ -33,26 +34,28 @@ impl Renderer {
             .await
             .unwrap();
 
+        let quad_buffers = QuadBuffers::new(&device, 10_000);
+
         let surface_context = SurfaceContext::new(window, adapter, instance);
         surface_context.configure(&device);
 
-        let indices: &[u16] = &[0, 1, 2, 2, 3, 0];
-
-        let quad = QuadInstance::new([20.0, 20.0], [80.0, 80.0], [1.0, 0.0,  0.0, 1.0]);
-
-        let vertices = &quad.to_verts();
-
-        let vertex_buffer = device.create_buffer_init(&BufferInitDescriptor {
-            label: Some("Hello Vert Buffer"),
-            contents: bytemuck::cast_slice(vertices),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-
-        let index_buffer = device.create_buffer_init(&BufferInitDescriptor {
-            label: Some("Hello IDX Buffer"),
-            contents: bytemuck::cast_slice(indices),
-            usage: wgpu::BufferUsages::INDEX,
-        });
+        // let indices: &[u16] = &[0, 1, 2, 2, 3, 0];
+        //
+        // let quad = QuadInstance::new([20.0, 20.0], [80.0, 80.0], [1.0, 0.0,  0.0, 1.0]);
+        //
+        // let vertices = &quad.to_verts();
+        //
+        // let vertex_buffer = device.create_buffer_init(&BufferInitDescriptor {
+        //     label: Some("Hello Vert Buffer"),
+        //     contents: bytemuck::cast_slice(vertices),
+        //     usage: wgpu::BufferUsages::VERTEX,
+        // });
+        //
+        // let index_buffer = device.create_buffer_init(&BufferInitDescriptor {
+        //     label: Some("Hello IDX Buffer"),
+        //     contents: bytemuck::cast_slice(indices),
+        //     usage: wgpu::BufferUsages::INDEX,
+        // });
 
         let shader = Shader::new(&device, include_str!("./shaders/pix_test.wgsl"), None);
 
@@ -64,12 +67,10 @@ impl Renderer {
         let renderer = Renderer {
             device,
             queue,
-            // surface,
-            // surface_format,
-            // size,
             pipeline,
-            vertex_buffer,
-            index_buffer,
+            // vertex_buffer,
+            // index_buffer,
+            quad_buffers,
             screen_buffer,
             screen_bind_group,
             screen_uniform,
@@ -87,6 +88,13 @@ impl Renderer {
     }
 
     pub fn render(&mut self, window: &Window) {
+        self.quad_buffers.clear();
+
+        let quad = QuadInstance::new([20.0, 20.0], [80.0, 80.0], [1.0, 0.0, 0.0, 1.0]);
+
+        self.quad_buffers.push(quad);
+        self.quad_buffers.upload(&self.queue);
+
         let ctx = &self.surface_context;
         let surface_texture = match ctx.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(texture) => texture,
@@ -144,10 +152,7 @@ impl Renderer {
 
             render_pass.set_pipeline(&pipeline.pipeline);
             render_pass.set_bind_group(0, &self.screen_bind_group, &[]);
-            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-
-            render_pass.draw_indexed(0..6, 0, 0..1);
+            self.quad_buffers.draw(&mut render_pass);
         }
 
         self.queue.submit([encoder.finish()]);
