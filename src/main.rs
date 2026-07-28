@@ -4,6 +4,7 @@ mod vertex;
 mod renderer;
 mod shader;
 mod pipelines;
+mod screen_uniform;
 
 use app::App;
 

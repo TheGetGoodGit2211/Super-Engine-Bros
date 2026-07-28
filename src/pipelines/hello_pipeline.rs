@@ -5,10 +5,18 @@ pub struct HelloPipeline {
 }
 
 impl HelloPipeline {
-    pub fn new(device: &wgpu::Device, format: wgpu::TextureFormat, shader: &crate::shader::Shader) -> Self {
+    pub fn new(
+        device: &wgpu::Device, 
+        format: wgpu::TextureFormat, 
+        shader: &crate::shader::Shader,
+        bind_group_layouts: &[&wgpu::BindGroupLayout], // <-- Add this!
+    ) -> Self {
+        // Map the layouts into Option<&wgpu::BindGroupLayout> array if needed by your wgpu version
+        let layouts: Vec<_> = bind_group_layouts.iter().map(|l| Some(*l)).collect();
+
         let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Hello Triangle Baby!!"),
-            bind_group_layouts: &[],
+            bind_group_layouts: &layouts, // <-- Use the layouts here!
             immediate_size: 0,
         });
 

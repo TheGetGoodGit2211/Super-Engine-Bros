@@ -3,7 +3,7 @@ use std::sync::Arc;
 use wgpu::util::{BufferInitDescriptor, DeviceExt};
 use winit::{event_loop::OwnedDisplayHandle, window::Window};
 
-use crate::{pipelines::hello_pipeline::HelloPipeline, shader::Shader, vertex::Vertex};
+use crate::{pipelines::hello_pipeline::HelloPipeline, screen_uniform::ScreenUniform, shader::Shader, vertex::Vertex};
 
 pub struct Renderer {
     pub device: wgpu::Device,
@@ -11,11 +11,12 @@ pub struct Renderer {
     pub surface: wgpu::Surface<'static>,
     pub surface_format: wgpu::TextureFormat,
     pub size: winit::dpi::PhysicalSize<u32>,
-    pub instance: wgpu::Instance,
-    shader: Shader,
     pipeline: HelloPipeline,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
+    screen_buffer: wgpu::Buffer,
+    screen_bind_group: wgpu::BindGroup,
+    screen_uniform: ScreenUniform,
 }
 
 impl Renderer {
@@ -38,17 +39,17 @@ impl Renderer {
         let cap = surface.get_capabilities(&adapter);
         let surface_format = cap.formats[0];
 
-        const VERTICES: &[Vertex] = &[
-            // Top-Left (Full Red, 100% Opaque)
-            Vertex { position: [-0.5, 0.5, 0.0, 1.0], color: [1.0, 0.0, 0.0, 1.0] },
-            // Bottom-Left (Full Green, 0% Alpha / Fully Transparent!)
-            Vertex { position: [-0.5, -0.5, 0.0, 1.0], color: [0.0, 1.0, 0.0, 0.0] },
-            // Bottom-Right (Full Blue, 100% Opaque)
-            Vertex { position: [0.5, -0.5, 0.0, 1.0], color: [0.0, 0.0, 1.0, 1.0] },
-            // Top-Right (Yellow: Red + Green, 100% Opaque)
-            Vertex { position: [0.5, 0.5, 0.0, 1.0], color: [1.0, 1.0, 0.0, 1.0] },
-        ];
         const INDICES: &[u16] = &[0, 1, 2, 2, 3, 0];
+        const VERTICES: &[Vertex; 4] = &[
+            // Top-Left corner (100, 100)
+            Vertex { position: [100.0, 100.0, 0.0, 1.0], color: [1.0, 0.0, 0.0, 1.0] },
+            // Bottom-Left corner (100, 164)
+            Vertex { position: [100.0, 164.0, 0.0, 1.0], color: [0.0, 1.0, 0.0, 1.0] },
+            // Bottom-Right corner (164, 164)
+            Vertex { position: [164.0, 164.0, 0.0, 1.0], color: [0.0, 0.0, 1.0, 1.0] },
+            // Top-Right corner (164, 100)
+            Vertex { position: [164.0, 100.0, 0.0, 1.0], color: [1.0, 1.0, 0.0, 1.0] },
+        ];
 
         let vertex_buffer = device.create_buffer_init(&BufferInitDescriptor {
             label: Some("Hello Vert Buffer"),
@@ -62,9 +63,12 @@ impl Renderer {
             usage: wgpu::BufferUsages::INDEX,
         });
 
-        let shader = Shader::new(&device, include_str!("./shaders/hello.wgsl"), None);
+        let shader = Shader::new(&device, include_str!("./shaders/pix_test.wgsl"), None);
 
-        let pipeline = HelloPipeline::new(&device, surface_format, &shader);
+        let (screen_uniform, screen_buffer, screen_bind_group_layout, screen_bind_group) =
+        Self::create_screen_uniform(&device, size.width as f32, size.height as f32);
+
+        let pipeline = HelloPipeline::new(&device, surface_format, &shader, &[&screen_bind_group_layout]);
 
         let renderer = Renderer {
             device,
@@ -72,11 +76,12 @@ impl Renderer {
             surface,
             surface_format,
             size,
-            instance,
-            shader,
             pipeline,
             vertex_buffer,
-            index_buffer
+            index_buffer,
+            screen_buffer,
+            screen_bind_group,
+            screen_uniform,
         };
 
         renderer.configure_surface();
@@ -101,6 +106,8 @@ impl Renderer {
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         self.size = new_size;
+        self.screen_uniform.update(new_size.width as f32, new_size.height as f32);
+        self.queue.write_buffer(&self.screen_buffer, 0, bytemuck::cast_slice(&[self.screen_uniform]));
         self.configure_surface();
     }
 
@@ -160,6 +167,7 @@ impl Renderer {
             let pipeline = &self.pipeline;
 
             render_pass.set_pipeline(&pipeline.pipeline);
+            render_pass.set_bind_group(0, &self.screen_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
 
@@ -169,5 +177,44 @@ impl Renderer {
         self.queue.submit([encoder.finish()]);
         window.pre_present_notify();
         self.queue.present(surface_texture);
+    }
+
+    fn create_screen_uniform(
+        device: &wgpu::Device,
+        width: f32,
+        height: f32,
+    ) -> (ScreenUniform, wgpu::Buffer, wgpu::BindGroupLayout, wgpu::BindGroup) {
+        let uniform = ScreenUniform::new(width, height);
+
+        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Screen Uniform Buffer"),
+            contents: bytemuck::cast_slice(&[uniform]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("Screen Bind Group Layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
+
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Screen Bind Group"),
+            layout: &layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: buffer.as_entire_binding(),
+            }],
+        });
+
+        (uniform, buffer, layout, bind_group)
     }
 }
