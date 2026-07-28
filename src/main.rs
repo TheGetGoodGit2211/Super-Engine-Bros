@@ -6,6 +6,7 @@ mod shader;
 mod pipelines;
 mod screen_uniform;
 mod quad_instance;
+mod surface_context;
 
 use app::App;
 
