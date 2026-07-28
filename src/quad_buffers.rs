@@ -53,7 +53,12 @@ impl QuadBuffers {
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
 
-        render_pass.draw_indexed(0..6, 0, 0..1);
+        let quad_count = self.vertices.len() / 4;
+        if quad_count == 0 {
+            return;
+        }
+
+        render_pass.draw_indexed(0..((quad_count * 6) as u32), 0, 0..1);
     }
 
     fn create_index_buffer(device: &wgpu::Device, max_quads: usize) -> wgpu::Buffer {

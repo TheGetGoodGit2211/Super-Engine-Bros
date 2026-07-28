@@ -91,8 +91,10 @@ impl Renderer {
         self.quad_buffers.clear();
 
         let quad = QuadInstance::new([20.0, 20.0], [80.0, 80.0], [1.0, 0.0, 0.0, 1.0]);
+        let other_quad = QuadInstance::new([100.0, 20.0], [80.0, 80.0], [1.0, 0.0, 1.0, 1.0]);
 
         self.quad_buffers.push(quad);
+        self.quad_buffers.push(other_quad);
         self.quad_buffers.upload(&self.queue);
 
         let ctx = &self.surface_context;
