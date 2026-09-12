@@ -1,0 +1,155 @@
+{
+  "frames": {
+    "bleed_dot": {
+      "frame": {
+        "h": 32,
+        "w": 32,
+        "x": 52,
+        "y": 76
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 32,
+        "w": 32
+      },
+      "spriteSourceSize": {
+        "h": 32,
+        "w": 32,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "color_dir": {
+      "frame": {
+        "h": 32,
+        "w": 32,
+        "x": 86,
+        "y": 76
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 32,
+        "w": 32
+      },
+      "spriteSourceSize": {
+        "h": 32,
+        "w": 32,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "dir": {
+      "frame": {
+        "h": 32,
+        "w": 32,
+        "x": 120,
+        "y": 76
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 32,
+        "w": 32
+      },
+      "spriteSourceSize": {
+        "h": 32,
+        "w": 32,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "output/atlas": {
+      "frame": {
+        "h": 72,
+        "w": 444,
+        "x": 2,
+        "y": 2
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 72,
+        "w": 444
+      },
+      "spriteSourceSize": {
+        "h": 72,
+        "w": 444,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "strange_size": {
+      "frame": {
+        "h": 32,
+        "w": 48,
+        "x": 2,
+        "y": 76
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 32,
+        "w": 48
+      },
+      "spriteSourceSize": {
+        "h": 32,
+        "w": 48,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "translucent_blue": {
+      "frame": {
+        "h": 32,
+        "w": 32,
+        "x": 154,
+        "y": 76
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 32,
+        "w": 32
+      },
+      "spriteSourceSize": {
+        "h": 32,
+        "w": 32,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "transparency": {
+      "frame": {
+        "h": 32,
+        "w": 32,
+        "x": 188,
+        "y": 76
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 32,
+        "w": 32
+      },
+      "spriteSourceSize": {
+        "h": 32,
+        "w": 32,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    }
+  },
+  "meta": {
+    "app": "FastPack",
+    "version": "1.0",
+    "image": "atlas.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 448,
+      "h": 110
+    },
+    "scale": "1"
+  }
+}

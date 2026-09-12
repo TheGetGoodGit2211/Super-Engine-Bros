@@ -8,6 +8,9 @@ mod screen_uniform;
 mod quad_instance;
 mod surface_context;
 mod quad_buffers;
+mod deserialize;
+mod atlas;
+mod sprite;
 
 use app::App;
 

@@ -13,6 +13,7 @@ pub struct Renderer {
     // index_buffer: wgpu::Buffer,
     quad_buffers: QuadBuffers,
     screen_buffer: wgpu::Buffer,
+    bind_group_layout: wgpu::BindGroupLayout,
     screen_bind_group: wgpu::BindGroup,
     screen_uniform: ScreenUniform,
     surface_context: SurfaceContext,
@@ -59,10 +60,10 @@ impl Renderer {
 
         let shader = Shader::new(&device, include_str!("./shaders/pix_test.wgsl"), None);
 
-        let (screen_uniform, screen_buffer, screen_bind_group_layout, screen_bind_group) =
+        let (screen_uniform, screen_buffer, bind_group_layout, screen_bind_group) =
         Self::create_screen_uniform(&device, surface_context.size.width as f32, surface_context.size.height as f32);
 
-        let pipeline = HelloPipeline::new(&device, surface_context.surface_format, &shader, &[&screen_bind_group_layout]);
+        let pipeline = HelloPipeline::new(&device, surface_context.surface_format, &shader, &[&bind_group_layout]);
 
         let renderer = Renderer {
             device,
@@ -72,6 +73,7 @@ impl Renderer {
             // index_buffer,
             quad_buffers,
             screen_buffer,
+            bind_group_layout,
             screen_bind_group,
             screen_uniform,
             surface_context,
